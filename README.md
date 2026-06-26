@@ -54,14 +54,14 @@ LLM, RAG, STT/TTS를 활용하여 플레이어와 자연스럽게 대화하는 N
 ## 시스템 아키텍처
 
 Unity Client  
-        │  
-   REST API  
-        │  
+&emsp;&emsp;│  
+&emsp;REST API  
+&emsp;&emsp;│  
 Azure OpenAI  
-        │  
- ├─ Azure AI Search (RAG)  
- ├─ Azure Speech STT  
- └─ Azure Speech TTS  
+&emsp;&emsp;│  
+&nbsp;├─ Azure AI Search (RAG)  
+&nbsp;├─ Azure Speech STT  
+&nbsp;└─ Azure Speech TTS  
 
 ---
 
