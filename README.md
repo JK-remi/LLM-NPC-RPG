@@ -59,9 +59,9 @@ Unity Client
 &emsp;&emsp;│  
 Azure OpenAI  
 &emsp;&emsp;│  
-&nbsp;├─ Azure AI Search (RAG)  
-&nbsp;├─ Azure Speech STT  
-&nbsp;└─ Azure Speech TTS  
+&emsp;&emsp;├─ Azure AI Search (RAG)  
+&emsp;&emsp;├─ Azure Speech STT  
+&emsp;&emsp;└─ Azure Speech TTS  
 
 ---
 
