@@ -154,8 +154,8 @@ RAG를 통해 현재 시나리오에 필요한 정보를 제공하더라도,
 LLM이 NPC의 성격이나 말투를 일관되게 유지하지 못하면
 캐릭터성이 무너지고 게임의 몰입감이 떨어질 수 있습니다.
 
-이를 해결하기 위해 NPC별 역할과 말투를 정의한 System Prompt를 구성하고,
-Unity와 Azure OpenAI를 REST API로 연동하여 NPC가 상황에 맞는 자연스러운 응답을 생성하도록 구현했습니다.
+이를 해결하기 위해 NPC의 역할과 성격, 행동 규칙을 System Prompt에 정의하여,
+LLM이 NPC의 입장에서 일관된 캐릭터성을 유지하며 대화하도록 설계했습니다.
 
 #### 설계
 
@@ -171,11 +171,10 @@ NPC는 단순히 정보를 전달하는 것이 아니라 시나리오에 맞는 
 
 #### 구현
 
-- Unity와 Azure OpenAI를 REST API(JSON)로 연동
-- NPC 역할을 System Prompt로 정의
+- NPC별 System Prompt 구성
+- NPC의 역할, 성격, 말투, 행동 규칙 정의
 - RAG Context와 플레이어 입력을 함께 전달
-- 응답 결과를 JSON으로 수신하여 Dialogue UI에 출력
-- 특정 조건에서는 `im_end`를 반환하여 게임 이벤트를 진행
+- 특정 조건에서는 `im_end`를 반환하여 게임 이벤트를 제어
 
 #### System Prompt 예시
 
@@ -202,20 +201,17 @@ NPC는 단순히 정보를 전달하는 것이 아니라 시나리오에 맞는 
 #### 흐름도
 ```mermaid
 flowchart LR
-    A[Player Message] --> B[Unity Client]
+    A[Player Message] --> D[Azure OpenAI]
 
-    B --> C[System Prompt]
-    B --> D[RAG Context]
+    B[System Prompt] --> D
+    C[RAG Context] --> D
 
-    C --> E[Azure OpenAI]
-    D --> E
+    D --> E[NPC Response]
 
-    E --> F[JSON Response]
+    E --> F{im_end?}
 
-    F --> G{im_end?}
-
-    G -- No --> H[Dialogue UI]
-    G -- Yes --> I[Next Scenario]
+    F -- No --> G[Continue Conversation]
+    F -- Yes --> H[Scenario Complete]
 ```
 
 #### 결과
@@ -226,6 +222,115 @@ flowchart LR
 - 특정 키워드 대신 상태 신호(`im_end`)를 통해 시나리오 진행 제어
 
 ### 3. 음성 인터랙션(STT/TTS)
+### 3-1. NPC 음성 대화
+#### 배경
+
+기존의 텍스트 기반 NPC 대화는 몰입감이 떨어지고 입력 과정이 번거로웠습니다.
+
+이를 개선하기 위해 플레이어의 음성을 STT로 텍스트로 변환하고, LLM이 생성한 응답을 다시 TTS를 통해 음성으로 출력하여 실제 NPC와 대화하는 듯한 경험을 제공하고자 했습니다.
+
+#### 설계
+
+플레이어의 음성 입력을 Azure Speech-to-Text로 변환한 뒤, Azure OpenAI에서 응답을 생성하고, 생성된 응답을 Azure Text-to-Speech를 이용하여 NPC 음성으로 출력하도록 설계했습니다.
+
+#### 구현
+
+- Azure Speech-to-Text를 이용한 플레이어 음성 입력
+- Azure OpenAI 기반 NPC 응답 생성
+- Azure Text-to-Speech를 이용한 NPC 음성 출력
+- Unity AudioSource를 이용한 음성 재생
+
+#### 흐름도
+```mermaid
+flowchart LR
+    A[Player Voice] --> B[Azure STT]
+    B --> C[Azure OpenAI]
+    C --> D[Azure TTS]
+    D --> E[NPC Voice]
+```
+
+#### 결과
+
+- 텍스트 입력 없이 NPC와 음성 대화 가능
+- 자연스러운 음성 기반 인터랙션 제공
+- 게임 몰입감 향상
+ 
+### 3-2. 음성 주문시스템 
+#### 배경
+
+단순히 음성을 텍스트로 변환하는 것만으로는 플레이어의 발음 숙련도를 게임 플레이에 반영하기 어려웠습니다.
+
+이를 해결하기 위해 Azure Speech Assessment의 음성 평가 결과를 활용하여 주문의 성공 여부와 데미지를 결정하는 시스템을 구현했습니다.
+
+#### 설계
+
+Speech Assessment에서 제공하는 Confidence, Accuracy, Fluency, Completeness 점수를 가중치로 계산하여 최종 점수를 산출하고, 해당 점수에 따라 주문의 등급과 데미지를 결정하도록 설계했습니다.
+
+또한 음성 인식 실패(ResultReason) 발생 시 재녹음을 수행하여 잘못된 인식으로 인한 플레이 경험 저하를 방지했습니다.
+
+#### 구현
+
+- Azure Speech Assessment 기반 음성 평가
+- Confidence, Accuracy, Fluency, Completeness 점수 수집
+- 가중치를 적용한 최종 점수 계산
+- ResultReason을 통한 음성 인식 실패 확인
+- 인식 실패 시 재녹음 수행
+- 최종 점수에 따른 주문 등급 및 데미지 계산
+
+##### 음성 평가 가중치
+| 평가 항목              | 가중치 |
+| ------------------ | --: |
+| Confidence Score   | 50% |
+| Accuracy Score     | 30% |
+| Fluency Score      | 10% |
+| Completeness Score | 10% |
+Final Score =
+Confidence × 0.5
++ Accuracy × 0.3
++ Fluency × 0.1
++ Completeness × 0.1
+
+##### 주문 등급
+| Final Score | Grade     |
+| ----------: | --------- |
+|        ≥ 90 | PERFECT   |
+|        ≥ 75 | EXCELLENT |
+|        ≥ 50 | GREAT     |
+|        ≥ 35 | GOOD      |
+|        < 35 | MISS      |
+
+#### 흐름도
+```mermaid
+flowchart LR
+    A[Spell Select] --> B[Player Voice]
+    B --> C[Azure STT]
+
+    C --> D[Speech Assessment]
+
+    D --> E[Confidence]
+    D --> F[Accuracy]
+    D --> G[Fluency]
+    D --> H[Completeness]
+
+    E --> I[Final Score]
+    F --> I
+    G --> I
+    H --> I
+
+    I --> J[Grade]
+
+    J --> K[Damage Calculation]
+
+    K --> L[Combat Result]
+```
+
+#### 결과
+
+- 음성 입력을 전투 시스템과 연동
+- 발음 정확도에 따른 스킬 성능 차등 적용
+- 음성 평가 결과를 게임 플레이에 활용
+- 재녹음을 통해 음성 인식 실패 상황 개선
+
 ### 4. Unity 게임 연동
 
 ---
