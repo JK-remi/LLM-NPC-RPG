@@ -118,6 +118,8 @@ flowchart LR
     H --> I[NPC Response]
     I --> J[Unity Dialogue UI]
 ```
+#### Azure AI Search에 시나리오 데이터 구축
+![Azure AI Search](images/rag_csv.png)
 
 #### RAG 데이터 구조
 
@@ -221,6 +223,9 @@ flowchart LR
 - 게임 진행 조건을 LLM 응답과 연계
 - 특정 키워드 대신 상태 신호(`im_end`)를 통해 시나리오 진행 제어
 
+#### 실제 대화 예시
+![Chat Example](images/chat_demo.png)
+
 ### 3. 음성 인터랙션(STT/TTS)
 ### 3-1. NPC 음성 대화
 #### 배경
@@ -294,6 +299,9 @@ Speech Assessment에서 제공하는 Confidence, Accuracy, Fluency, Completeness
 |        ≥ 50 | GREAT     |
 |        ≥ 35 | GOOD      |
 |        < 35 | MISS      |
+
+##### Speech Assessment 결과
+![Speech Assessment](images/assessment.png)
 
 #### 흐름도
 ```mermaid
@@ -384,6 +392,11 @@ D --> F[im_end]
 
 F --> G[Scenario Event]
 ```
+#### Unity 대화
+![Unity Dialogue](images/unity_dialogue.png)
+
+#### Unity 전투
+![Unity Battle](images/unity_battle.png)
 
 #### 결과
 
