@@ -327,7 +327,71 @@ flowchart LR
 - 음성 평가 결과를 게임 플레이에 활용
 - 재녹음을 통해 음성 인식 실패 상황 개선
 
-### 4. Unity 게임 연동
+### 4. Unity AI 연동
+#### 배경
+
+AI 기능은 단순히 외부 서비스를 호출하는 것이 아니라 게임 플레이의 일부로 자연스럽게 동작해야 했습니다.
+
+이를 위해 Unity에서 Azure OpenAI와 Azure Speech를 연동하고, 대화·음성 인터랙션·시나리오 진행이 하나의 게임 시스템으로 동작하도록 구현했습니다.
+
+#### 설계
+
+각 AI 서비스의 특성에 맞는 연동 방식을 적용했습니다.
+
+- LLM은 REST API를 통해 Azure OpenAI와 통신
+- STT/TTS는 Azure Speech SDK(Cognitive Services)를 사용
+- AI 응답은 Unity의 UI 및 게임 이벤트와 연동
+
+#### 구현
+
+- UnityWebRequest 기반 Azure OpenAI REST API 연동
+- Azure Speech SDK(Cognitive Services)를 이용한 STT/TTS 구현
+- 음성 데이터를 Audio 파일로 변환하여 STT 요청
+- TTS 결과를 AudioClip으로 변환하여 Unity에서 재생
+- GPT 요청은 JsonUtility를 이용하여 Request Body 생성
+- GPT 응답은 필요한 `content`만 추출하여 게임에 맞게 후처리
+
+##### GPT 응답 후처리
+
+Azure OpenAI의 응답에는 대화 내용 외에도 메타데이터가 함께 포함되어 있었습니다.
+
+게임에서는 NPC의 대사만 필요했기 때문에 `content` 영역만 추출하여 사용했으며,
+응답에 포함될 수 있는 특수문자와 게임 제어용 문자열(`im_end`)은 별도로 제거하여 Dialogue UI에 출력하도록 구현했습니다.
+
+##### AI 서비스별 연동 방식
+| 기능                    | 연동 방식                                 |
+| --------------------- | ------------------------------------- |
+| Azure OpenAI          | UnityWebRequest (REST API)            |
+| Azure Speech(STT/TTS) | Azure Speech SDK (Cognitive Services) |
+| Request               | JsonUtility                           |
+| Response              | Response Parser (content 추출)         |
+
+#### 흐름도
+```mermaid
+flowchart LR
+
+A[Unity Client]
+
+--> B[UnityWebRequest]
+
+--> C[Azure OpenAI]
+
+--> D[Response Parsing]
+
+--> E[Dialogue UI]
+
+D --> F[im_end]
+
+F --> G[Scenario Event]
+```
+
+#### 결과
+
+- Azure OpenAI와 Azure Speech를 Unity 게임에 통합
+- 서비스 특성에 맞는 API 및 SDK 적용
+- 음성 데이터를 Unity에서 직접 활용 가능한 형태로 변환
+- GPT 응답에서 필요한 대사만 추출하여 UI에 출력
+- 게임 제어용 문자열(`im_end`)을 활용하여 시나리오와 AI 응답을 연계
 
 ---
 
