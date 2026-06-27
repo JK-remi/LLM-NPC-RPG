@@ -278,17 +278,13 @@ Speech Assessment에서 제공하는 Confidence, Accuracy, Fluency, Completeness
 - 최종 점수에 따른 주문 등급 및 데미지 계산
 
 ##### 음성 평가 가중치
-| 평가 항목              | 가중치 |
-| ------------------ | --: |
-| Confidence Score   | 50% |
-| Accuracy Score     | 30% |
-| Fluency Score      | 10% |
-| Completeness Score | 10% |
-Final Score =
-Confidence × 0.5
-+ Accuracy × 0.3
-+ Fluency × 0.1
-+ Completeness × 0.1
+| 평가 요소        |                                                                                 비율 |
+| ------------ | ---------------------------------------------------------------------------------: |
+| Confidence   |                                                                                50% |
+| Accuracy     |                                                                                30% |
+| Fluency      |                                                                                10% |
+| Completeness |                                                                                10% |
+| **최종 점수 계산** | **(Confidence × 0.5) + (Accuracy × 0.3) + (Fluency × 0.1) + (Completeness × 0.1)** |
 
 ##### 주문 등급
 | Final Score | Grade     |
