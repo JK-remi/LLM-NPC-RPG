@@ -147,13 +147,83 @@ LLM이 현재 시나리오의 맥락을 이해하고 게임 진행 흐름에 맞
 - 미래 스토리 노출 방지
 - 대화 이력을 별도로 관리하지 않고도 시나리오 기반 대화 유지
   
-② RAG
+### 2. LLM NPC 대화 시스템
+#### 배경
 
-③ STT
+RAG를 통해 현재 시나리오에 필요한 정보를 제공하더라도,
+LLM이 NPC의 성격이나 말투를 일관되게 유지하지 못하면
+캐릭터성이 무너지고 게임의 몰입감이 떨어질 수 있습니다.
 
-④ TTS
+이를 해결하기 위해 NPC별 역할과 말투를 정의한 System Prompt를 구성하고,
+Unity와 Azure OpenAI를 REST API로 연동하여 NPC가 상황에 맞는 자연스러운 응답을 생성하도록 구현했습니다.
 
-⑤ Unity 연동
+#### 설계
+
+NPC는 단순히 정보를 전달하는 것이 아니라 시나리오에 맞는 역할을 수행해야 했습니다.
+
+이를 위해 System Prompt에 다음 정보를 포함했습니다.
+
+- NPC 역할
+- 성격 및 말투
+- 현재 상황에서의 행동 규칙
+- 게임 진행 조건
+- 대화 종료 조건
+
+#### 구현
+
+- Unity와 Azure OpenAI를 REST API(JSON)로 연동
+- NPC 역할을 System Prompt로 정의
+- RAG Context와 플레이어 입력을 함께 전달
+- 응답 결과를 JSON으로 수신하여 Dialogue UI에 출력
+- 특정 조건에서는 `im_end`를 반환하여 게임 이벤트를 진행
+
+#### System Prompt 예시
+
+```text
+너는 인어공주 연극을 하는 봇이다.
+
+등장인물 : 우르술라
+
+성격
+- 악랄함
+- 음모를 꾸밈
+- 거짓말쟁이
+- 마녀
+
+인덱스 데이터를 기반으로
+우르술라의 입장에서 한 문장씩 대답한다.
+
+출처는 표시하지 않는다.
+
+특정 조건이 만족되면
+'im_end'를 반환하여 게임 이벤트를 진행한다.
+```
+
+#### 흐름도
+```mermaid
+flowchart LR
+    A[Player Message] --> B[Unity Client]
+
+    B --> C[System Prompt]
+    B --> D[RAG Context]
+
+    C --> E[Azure OpenAI]
+    D --> E
+
+    E --> F[JSON Response]
+
+    F --> G{im_end?}
+
+    G -- No --> H[Dialogue UI]
+    G -- Yes --> I[Next Scenario]
+```
+
+#### 결과
+
+- NPC의 성격과 말투를 일관되게 유지
+- 자유로운 자연어 입력 기반 대화 지원
+- 게임 진행 조건을 LLM 응답과 연계
+- 특정 키워드 대신 상태 신호(`im_end`)를 통해 시나리오 진행 제어
 
 ---
 
