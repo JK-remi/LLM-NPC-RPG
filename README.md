@@ -301,7 +301,7 @@ Speech Assessment에서 제공하는 Confidence, Accuracy, Fluency, Completeness
 |        < 35 | MISS      |
 
 ##### Speech Assessment 결과
-![Speech Assessment](images/assessment.png)
+![Speech Assessment](images/speech_assessment.png)
 
 #### 흐름도
 ```mermaid
