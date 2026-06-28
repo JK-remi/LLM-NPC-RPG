@@ -1,8 +1,8 @@
 # LLM-NPC-RPG
 ## 🎬 Demo
-▶ Trailer (https://youtu.be/8T0DTV-vXv0)
-▶ Gameplay Highlight (https://youtu.be/B87SKs729xo)
-▶ Full Gameplay Playlist (https://www.youtube.com/playlist?list=PLZ9kCtQmPheI)
+\-▶ Trailer (https://youtu.be/8T0DTV-vXv0)
+\-▶ Gameplay Highlight (https://youtu.be/B87SKs729xo)
+\-▶ Full Gameplay Playlist (https://www.youtube.com/playlist?list=PLZ9kCtQmPheI)
 
 LLM, RAG, STT/TTS를 활용하여 플레이어와 자연스럽게 대화하는 NPC를 구현한 Unity 기반 AI RPG 프로젝트입니다.
 
